@@ -2,6 +2,7 @@
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const jwt=require('jsonwebtoken');
+const SECRET="hi";
 const userSchema = (sequelize, DataTypes) => {
   const model = sequelize.define('class7s', {
     username: { type: DataTypes.STRING, allowNull: false, unique: true },
@@ -9,10 +10,10 @@ const userSchema = (sequelize, DataTypes) => {
     token: {
       type: DataTypes.VIRTUAL,
       get() {
-        return jwt.sign({ username: this.username},process.env.SECRET);
+        return jwt.sign({ username: this.username},SECRET);
       },
       set(tokenObj) {
-        return jwt.sign(tokenObj, process.env.SECRET);
+        return jwt.sign(tokenObj, SECRET);
      }
     }
   });
@@ -20,6 +21,7 @@ const userSchema = (sequelize, DataTypes) => {
   model.beforeCreate(async (user) => {
     let hashedPass =await bcrypt.hash(user.password, 10);
     user.password = hashedPass;
+    return hashedPass;
   });
 
   // Basic AUTH: Validating strings (username, password) 
@@ -41,8 +43,9 @@ const userSchema = (sequelize, DataTypes) => {
   model.authenticateWithToken  = async function (token) {
 
     try {
-      const parsedToken = jwt.verify(token, process.env.SECRET);
-      const user = this.findOne({ where: {username: parsedToken.username} })
+      const parsedToken = jwt.verify(token, SECRET);
+      const user = await this.findOne({ where: {username: parsedToken.username} })
+      console.log('user',user);
       if (user) { return user; }
       throw new Error("User Not Found");
     } catch (e) {

@@ -5,11 +5,13 @@ const authRouter = express.Router();
 const bcrypt=require('bcrypt');
 const { users } = require('./models/index.js');
 const basicAuth = require('./middleware/basic.js')
-const bearerAuth = require('./middleware/bearer.js')
+const bearerAuth = require('./middleware/bearer')
 
 authRouter.post('/signup', async (req, res, next) => {
   try {
+   
     let userRecord = await users.create(req.body);
+    console.log(userRecord);
     const output = {
       user: userRecord,
       token: userRecord.token
@@ -31,11 +33,13 @@ authRouter.post('/signin', basicAuth, (req, res, next) => {
 authRouter.get('/users', bearerAuth, async (req, res, next) => {
   const user = await users.findAll({});
   const list = user.map(user => user.username);
+
   res.status(200).json(list);
 });
 
 authRouter.get('/secret', bearerAuth, async (req, res, next) => {
-  res.status(200).send("Welcome to the secret area!")
+  
+   res.status(200).send("Welcome to the secret area!")
 });
 
 

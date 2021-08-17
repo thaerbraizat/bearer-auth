@@ -6,5 +6,5 @@ db.sync()
   .then(() => {
 
     // Start the web server
-    require('./src/server.js').start(4000);
+    require('./src/server.js').start(4002);
   });
